@@ -1,0 +1,20 @@
+{
+  "cards": [
+    {
+      "name": "Emperor",
+      "type": "emperor",
+      "color": "#C9A227"
+    },
+    {
+      "name": "Citizen",
+      "type": "citizen",
+      "color": "#2F6FB3"
+    },
+    {
+      "name": "Slave",
+      "type": "slave",
+      "color": "#8B5A2B"
+    }
+  ],
+  "card_back": "#1E1E24"
+}
