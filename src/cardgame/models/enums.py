@@ -19,3 +19,10 @@ class CardType(str, Enum):
 
 
 CardKind = CardType
+
+
+class Phase(str, Enum):
+    SELECTING = "selecting"
+    REVEALED = "revealed"
+    RESOLVED = "resolved"
+    MATCH_OVER = "match_over"
