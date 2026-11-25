@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>New match - لعبة البطاقات</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #14161c;
+      --panel: #20232d;
+      --text: #f2f2f5;
+      --muted: #b9bdc9;
+      --accent: #4c8bf5;
+      --error: #ff8a80;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+      line-height: 1.5;
+    }
+    .app { max-width: 32rem; margin: 0 auto; padding: 1rem; }
+    h1 { font-size: 1.4rem; margin: 0 0 .75rem; }
+    button {
+      font: inherit;
+      min-height: 2.75rem;
+      padding: .6rem .9rem;
+      border: 1px solid #3a3f4d;
+      border-radius: .6rem;
+      background: var(--panel);
+      color: var(--text);
+      cursor: pointer;
+    }
+    button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-wrap: wrap; }
+    #new-match { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+    .scoreboard {
+      display: flex;
+      justify-content: space-around;
+      gap: .5rem;
+      flex-wrap: wrap;
+      background: var(--panel);
+      border-radius: .75rem;
+      padding: .75rem;
+      margin: .75rem 0;
+    }
+    .scoreboard div { text-align: center; min-width: 5rem; }
+    .scoreboard strong { display: block; font-size: 1.25rem; }
+    .switcher { display: flex; gap: .5rem; margin-bottom: .75rem; }
+    .switcher button { flex: 1; }
+    .switcher button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .status { min-height: 2.5rem; padding: .6rem .75rem; border-radius: .6rem; background: var(--panel); margin-bottom: .75rem; }
+    .status.error { color: var(--error); }
+    .hand { display: grid; gap: .6rem; }
+    .card {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      width: 100%;
+      text-align: right;
+      border-inline-start: .5rem solid var(--card-color, #888);
+      font-size: 1.1rem;
+    }
+    .swatch { width: 1.1rem; height: 1.1rem; border-radius: 50%; background: var(--card-color, #888); flex: none; }
+    .reveal { margin-top: .75rem; background: var(--panel); border-radius: .75rem; padding: .75rem; }
+    .reveal h2 { font-size: 1rem; margin: 0 0 .4rem; }
+    .reveal .picks { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .reveal .pick { border-radius: .5rem; padding: .35rem .6rem; border-inline-start: .35rem solid var(--card-color, #888); }
+    .muted { color: var(--muted); }
+    @media (min-width: 30rem) { .hand { grid-template-columns: repeat(3, 1fr); } }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="top">
+      <h1>لعبة البطاقات</h1>
+      <button id="new-match" type="button" aria-label="New match" title="New match">مباراة جديدة</button>
+    </div>
+
+    <section class="scoreboard" aria-label="الحالة">
+      <div>الجولة<strong id="round">-</strong></div>
+      <div>نجوم اللاعب ١<strong id="stars-p1">0</strong></div>
+      <div>نجوم اللاعب ٢<strong id="stars-p2">0</strong></div>
+    </section>
+
+    <section class="switcher" aria-label="اختيار اللاعب">
+      <button type="button" data-player="p1" class="active" aria-label="Player 1">اللاعب ١</button>
+      <button type="button" data-player="p2" aria-label="Player 2">اللاعب ٢</button>
+    </section>
+
+    <p id="status" class="status" role="status" aria-live="polite">ابدأ مباراة جديدة للعب.</p>
+
+    <section id="hand" class="hand" aria-label="بطاقات اللاعب"></section>
+    <section id="reveal" class="reveal" hidden>
+      <h2>كشف البطاقات</h2>
+      <div id="reveal-picks" class="picks"></div>
+      <p id="reveal-result" class="muted"></p>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var CARD_NAMES = {
+        emperor: "الإمبراطور", Emperor: "الإمبراطور",
+        citizen: "المواطن", Citizen: "المواطن",
+        slave: "العبد", Slave: "العبد"
+      };
+      var PLAYER_NAMES = { p1: "اللاعب ١", p2: "اللاعب ٢" };
+      var PLAYERS = ["p1", "p2"];
+
+      var matchId = null;
+      var active = "p1";
+      var currentView = null;
+      var previousStars = { p1: 0, p2: 0 };
+      var roundNumber = null;
+      var lastResult = null;
+
+      var statusEl = document.getElementById("status");
+      var handEl = document.getElementById("hand");
+      var roundEl = document.getElementById("round");
+      var starsEls = { p1: document.getElementById("stars-p1"), p2: document.getElementById("stars-p2") };
+      var revealEl = document.getElementById("reveal");
+      var revealPicksEl = document.getElementById("reveal-picks");
+      var revealResultEl = document.getElementById("reveal-result");
+      var switchButtons = Array.prototype.slice.call(document.querySelectorAll(".switcher button"));
+
+      function setStatus(text, isError) {
+        statusEl.textContent = text;
+        statusEl.classList.toggle("error", Boolean(isError));
+      }
+
+      async function api(url, options) {
+        var response = await fetch(url, options);
+        var data = {};
+        try { data = await response.json(); } catch (ignored) { /* empty body */ }
+        if (!response.ok) {
+          throw new Error(data.error || ("تعذر إكمال الطلب (" + response.status + ")"));
+        }
+        return data;
+      }
+
+      function cardName(card) {
+        return CARD_NAMES[card.name] || CARD_NAMES[card.type] || card.name || "";
+      }
+
+      function phaseOf(view) {
+        return String(view.phase || "").toLowerCase();
+      }
+
+      function resultFromStars(view) {
+        var stars = view.stars || {};
+        var gainer = null;
+        PLAYERS.forEach(function (id) {
+          if ((stars[id] || 0) > (previousStars[id] || 0)) gainer = id;
+        });
+        if (gainer) {
+          if (roundNumber === null) roundNumber = 1;
+          return "فاز " + PLAYER_NAMES[gainer] + " بهذه الجولة";
+        }
+        return null;
+      }
+
+      function renderReveal(view) {
+        var phase = phaseOf(view);
+        var revealed = phase === "revealed" || view.revealed === true;
+        var picks = view.revealed_cards || view.picks || null;
+        var result = view.round_result || view.round_winner || view.result || lastResult;
+        revealPicksEl.textContent = "";
+        revealResultEl.textContent = "";
+
+        if (!revealed) { revealEl.hidden = true; return; }
+        revealEl.hidden = false;
+        if (picks) {
+          PLAYERS.forEach(function (id) {
+            var pick = picks[id];
+            if (!pick) return;
+            var card = pick.card || pick;
+            var node = document.createElement("span");
+            node.className = "pick";
+            node.style.setProperty("--card-color", card.color || "#888");
+            node.textContent = PLAYER_NAMES[id] + ": " + cardName(card);
+            revealPicksEl.appendChild(node);
+          });
+        } else {
+          revealPicksEl.textContent = "تم كشف البطاقات.";
+        }
+        revealResultEl.textContent = typeof result === "string" ? result : "";
+      }
+
+      function renderCards(view) {
+        handEl.textContent = "";
+        var cards = view.cards || [];
+        if (view.committed_pick !== null && view.committed_pick !== undefined) {
+          var note = document.createElement("p");
+          note.className = "muted";
+          note.textContent = "اختيارك: " + cardName(cards[view.committed_pick]);
+          handEl.appendChild(note);
+        }
+        cards.forEach(function (card, position) {
+          var button = document.createElement("button");
+          button.type = "button";
+          button.className = "card";
+          button.style.setProperty("--card-color", card.color || "#888");
+          button.setAttribute("data-position", String(position));
+          var swatch = document.createElement("span");
+          swatch.className = "swatch";
+          var label = document.createElement("span");
+          label.textContent = cardName(card);
+          button.appendChild(swatch);
+          button.appendChild(label);
+          button.addEventListener("click", function () { selectCard(position); });
+          handEl.appendChild(button);
+        });
+      }
+
+      function render() {
+        if (!currentView) return;
+        var view = currentView;
+        var stars = view.stars || {};
+        PLAYERS.forEach(function (id) {
+          starsEls[id].textContent = String(stars[id] === undefined ? 0 : stars[id]);
+        });
+        if (view.round_number !== undefined && view.round_number !== null) {
+          roundNumber = view.round_number;
+        }
+        roundEl.textContent = roundNumber === null ? "-" : String(roundNumber);
+
+        var phase = phaseOf(view);
+        if (phase === "match_over" || view.winner) {
+          var winner = view.winner;
+          setStatus("انتهت المباراة" + (winner ? " - الفائز: " + (PLAYER_NAMES[winner] || winner) : ""));
+        } else if (view.committed_pick !== null && view.committed_pick !== undefined) {
+          setStatus("تم اختيارك. حوّل اللعب إلى اللاعب الآخر.");
+        } else if (lastResult) {
+          setStatus(lastResult);
+        } else {
+          setStatus("اختر بطاقة من يديك.");
+        }
+
+        renderCards(view);
+        renderReveal(view);
+
+        previousStars = { p1: stars.p1 || 0, p2: stars.p2 || 0 };
+      }
+
+      async function refresh() {
+        if (!matchId) return;
+        try {
+          currentView = await api(
+            "/api/matches/" + encodeURIComponent(matchId) + "?player=" + encodeURIComponent(active)
+          );
+          render();
+        } catch (error) {
+          setStatus(error.message, true);
+        }
+      }
+
+      async function selectCard(position) {
+        if (!matchId) { setStatus("ابدأ مباراة جديدة أولاً.", true); return; }
+        try {
+          var view = await api(
+            "/api/matches/" + encodeURIComponent(matchId) + "/select",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ player: active, position: position })
+            }
+          );
+          lastResult = view.round_result || view.round_winner || resultFromStars(view);
+          currentView = view;
+          render();
+        } catch (error) {
+          setStatus(error.message, true);
+        }
+      }
+
+      function setActive(player) {
+        active = player;
+        switchButtons.forEach(function (button) {
+          button.classList.toggle("active", button.getAttribute("data-player") === player);
+        });
+        refresh();
+      }
+
+      async function newMatch() {
+        try {
+          var seed = Math.floor(Math.random() * 2147483647);
+          var data = await api("/api/matches", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ player_a: "p1", player_b: "p2", seed: seed })
+          });
+          matchId = data.match_id;
+          active = "p1";
+          previousStars = { p1: 0, p2: 0 };
+          roundNumber = null;
+          lastResult = null;
+          setActive("p1");
+          setStatus("بدأت مباراة جديدة.");
+        } catch (error) {
+          setStatus(error.message, true);
+        }
+      }
+
+      document.getElementById("new-match").addEventListener("click", newMatch);
+      switchButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          setActive(button.getAttribute("data-player"));
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

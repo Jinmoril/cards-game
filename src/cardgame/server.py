@@ -47,6 +47,11 @@ def health():
     return jsonify(status="ok")
 
 
+@app.get("/play")
+def play_page():
+    return app.send_static_file("index.html")
+
+
 @app.post("/api/matches")
 def create_match():
     payload = _json_body()
