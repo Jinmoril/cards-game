@@ -7,70 +7,306 @@
   <style>
     :root {
       color-scheme: dark;
-      --bg: #14161c;
-      --panel: #20232d;
-      --text: #f2f2f5;
-      --muted: #b9bdc9;
-      --accent: #4c8bf5;
-      --error: #ff8a80;
+      --felt: #0d2b20;
+      --felt-dark: #071a13;
+      --gold: #C9A227;
+      --gold-soft: #ecd27a;
+      --parchment: #f2e6c8;
+      --ink: #3a2b17;
+      --navy: #1E1E24;
+      --panel: rgba(7, 26, 19, .86);
+      --text: #f6ecd2;
+      --muted: #cfc39f;
+      --error: #ffb3a7;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      background: var(--bg);
+      min-height: 100vh;
       color: var(--text);
-      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
-      line-height: 1.5;
+      font-family: "Amiri", Georgia, serif;
+      line-height: 1.6;
+      background-color: var(--felt);
+      background-image:
+        radial-gradient(ellipse 60% 45% at 50% 38%, rgba(255, 240, 190, .18), transparent 72%),
+        radial-gradient(circle at 50% 18%, rgba(255, 255, 255, .05), transparent 48%),
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, .012) 0 1px, transparent 1px 4px),
+        repeating-linear-gradient(90deg, rgba(0, 0, 0, .025) 0 1px, transparent 1px 5px);
     }
-    .app { max-width: 32rem; margin: 0 auto; padding: 1rem; }
-    h1 { font-size: 1.4rem; margin: 0 0 .75rem; }
+    .app { position: relative; max-width: 34rem; margin: 0 auto; padding: 1.25rem 1rem 2rem; }
+    .app::before {
+      content: "";
+      position: fixed;
+      inset: .55rem;
+      border: 1px solid rgba(201, 162, 39, .32);
+      border-radius: 1rem;
+      box-shadow: inset 0 0 0 4px rgba(7, 26, 19, .55);
+      pointer-events: none;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.65rem;
+      color: var(--gold-soft);
+      letter-spacing: .03em;
+      text-shadow: 0 2px 5px rgba(0, 0, 0, .7);
+    }
     button {
       font: inherit;
       min-height: 2.75rem;
-      padding: .6rem .9rem;
-      border: 1px solid #3a3f4d;
-      border-radius: .6rem;
-      background: var(--panel);
+      padding: .55rem .9rem;
+      border: 1px solid rgba(201, 162, 39, .65);
+      border-radius: .4rem;
+      background: linear-gradient(#183f2e, #0b271c);
       color: var(--text);
       cursor: pointer;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .05), 0 2px 5px rgba(0, 0, 0, .4);
     }
-    button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-wrap: wrap; }
-    #new-match { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+    button:hover { border-color: var(--gold-soft); }
+    button:focus-visible { outline: 2px solid var(--gold-soft); outline-offset: 3px; }
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      flex-wrap: wrap;
+      padding: .6rem .75rem;
+      border-block: 1px solid rgba(201, 162, 39, .4);
+    }
+    #new-match {
+      background: linear-gradient(#e0be52, #a37d1a);
+      border-color: #f4dc8d;
+      color: #1b1509;
+      font-weight: 700;
+    }
     .scoreboard {
       display: flex;
       justify-content: space-around;
       gap: .5rem;
       flex-wrap: wrap;
       background: var(--panel);
-      border-radius: .75rem;
+      border: 1px solid rgba(201, 162, 39, .45);
+      border-radius: .6rem;
       padding: .75rem;
       margin: .75rem 0;
+      box-shadow: inset 0 0 1.5rem rgba(0, 0, 0, .4);
     }
-    .scoreboard div { text-align: center; min-width: 5rem; }
-    .scoreboard strong { display: block; font-size: 1.25rem; }
+    .scoreboard div { text-align: center; min-width: 5rem; color: var(--muted); font-size: .95rem; }
+    .scoreboard strong {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: .25rem;
+      min-height: 2rem;
+      font-size: 1.25rem;
+      color: var(--text);
+    }
+    .medal {
+      display: inline-grid;
+      place-items: center;
+      width: 1.55rem;
+      height: 1.55rem;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 28%, #f9e59a, var(--gold) 58%, #866314);
+      border: 1px solid #f3dd94;
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, .38), 0 2px 5px rgba(0, 0, 0, .5);
+      color: #5c3f0a;
+    }
+    .medal svg { display: block; width: 1rem; height: 1rem; }
     .switcher { display: flex; gap: .5rem; margin-bottom: .75rem; }
     .switcher button { flex: 1; }
-    .switcher button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .status { min-height: 2.5rem; padding: .6rem .75rem; border-radius: .6rem; background: var(--panel); margin-bottom: .75rem; }
-    .status.error { color: var(--error); }
-    .hand { display: grid; gap: .6rem; }
+    .switcher button.active {
+      background: linear-gradient(#e0be52, #a37d1a);
+      border-color: #f4dc8d;
+      color: #1b1509;
+      font-weight: 700;
+    }
+    .status {
+      min-height: 2.5rem;
+      padding: .6rem .75rem;
+      border: 1px solid rgba(201, 162, 39, .35);
+      border-radius: .45rem;
+      background: rgba(7, 26, 19, .72);
+      margin-bottom: .75rem;
+      text-align: center;
+    }
+    .status.error { color: var(--error); border-color: rgba(255, 150, 130, .6); }
+    .hand {
+      display: grid;
+      gap: .85rem;
+      padding: .85rem;
+      border: 1px solid rgba(201, 162, 39, .3);
+      border-radius: .6rem;
+      background: rgba(5, 20, 14, .38);
+    }
+    .muted { color: var(--muted); }
+    .hand .muted { grid-column: 1 / -1; margin: 0 0 .15rem; text-align: center; }
     .card {
+      display: block;
+      width: 100%;
+      max-width: 13rem;
+      min-height: 0;
+      margin-inline: auto;
+      padding: 0;
+      border: 0;
+      border-radius: .45rem;
+      background: transparent;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, .5);
+      overflow: hidden;
+      transition: transform .18s ease;
+    }
+    .card:hover { transform: translateY(-2px); }
+    .card-art {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      color: var(--card-color, var(--gold));
+      background: var(--parchment);
+      border: 2px solid #8a6814;
+      border-radius: .35rem;
+      box-shadow:
+        inset 0 0 0 3px #fff6dc,
+        inset 0 0 0 5px var(--gold),
+        inset 0 0 18px rgba(90, 60, 20, .28),
+        0 0 0 1px #4c390c;
+    }
+    .card-art::before {
+      content: "";
+      position: absolute;
+      inset: 5px;
+      z-index: 5;
+      border: 1px solid rgba(138, 104, 20, .85);
+      border-radius: .2rem;
+      pointer-events: none;
+    }
+    .card-frame { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; }
+    .card-corner {
+      position: absolute;
+      width: 1.35rem;
+      height: 1.35rem;
+      color: #9a7622;
+      opacity: .92;
+    }
+    .card-corner.tl { inset-block-start: .35rem; inset-inline-start: .35rem; }
+    .card-corner.tr { inset-block-start: .35rem; inset-inline-end: .35rem; transform: scaleX(-1); }
+    .card-corner.bl { inset-block-end: .35rem; inset-inline-start: .35rem; transform: scaleY(-1); }
+    .card-corner.br { inset-block-end: .35rem; inset-inline-end: .35rem; transform: scale(-1); }
+    .card-banner {
+      position: relative;
+      z-index: 4;
+      margin: 1.4rem .7rem .25rem;
+      padding: .24rem .5rem;
+      text-align: center;
+      color: #2b1f0d;
+      font-size: clamp(.8rem, 3.6vw, 1rem);
+      font-weight: 700;
+      line-height: 1.35;
+      background: linear-gradient(#f4dd93, var(--gold));
+      border: 1px solid #8a6814;
+      border-radius: .2rem;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+    }
+    .card-emblem { flex: 1; display: grid; place-items: center; min-height: 0; padding: .25rem; }
+    .card-emblem svg {
+      display: block;
+      width: 62%;
+      max-height: 7rem;
+      filter: drop-shadow(0 1px 0 rgba(255, 255, 255, .55));
+    }
+    .card-rule {
+      position: relative;
+      z-index: 4;
       display: flex;
       align-items: center;
-      gap: .75rem;
-      width: 100%;
-      text-align: right;
-      border-inline-start: .5rem solid var(--card-color, #888);
-      font-size: 1.1rem;
+      justify-content: center;
+      min-height: 2.4rem;
+      margin: auto .45rem .45rem;
+      padding: .32rem .45rem;
+      text-align: center;
+      color: var(--strip-ink, #fff6de);
+      font-size: clamp(.62rem, 2.8vw, .78rem);
+      line-height: 1.35;
+      background: var(--card-color, #888);
+      border: 1px solid rgba(0, 0, 0, .35);
+      border-radius: .18rem;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22);
     }
-    .swatch { width: 1.1rem; height: 1.1rem; border-radius: 50%; background: var(--card-color, #888); flex: none; }
-    .reveal { margin-top: .75rem; background: var(--panel); border-radius: .75rem; padding: .75rem; }
-    .reveal h2 { font-size: 1rem; margin: 0 0 .4rem; }
-    .reveal .picks { display: flex; gap: .5rem; flex-wrap: wrap; }
-    .reveal .pick { border-radius: .5rem; padding: .35rem .6rem; border-inline-start: .35rem solid var(--card-color, #888); }
-    .muted { color: var(--muted); }
+    .reveal {
+      margin-top: 1rem;
+      padding: 1rem .75rem 1.25rem;
+      border: 1px solid rgba(201, 162, 39, .45);
+      border-radius: .65rem;
+      background: radial-gradient(circle at center, rgba(27, 74, 54, .92), rgba(7, 26, 19, .94));
+      box-shadow: inset 0 0 2rem rgba(0, 0, 0, .45);
+      text-align: center;
+    }
+    .reveal h2 { margin: 0 0 .35rem; font-size: 1.1rem; color: var(--gold-soft); }
+    #reveal-result { margin: 0 0 .9rem; min-height: 1.5rem; color: #fff1c9; font-weight: 700; }
+    .reveal .picks {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      perspective: 1000px;
+    }
+    .reveal .pick {
+      display: block;
+      width: min(11rem, 44%);
+      padding: 0;
+      border: 0;
+      border-radius: .45rem;
+      background: transparent;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, .55);
+    }
+    .reveal .pick::after {
+      content: attr(data-player);
+      display: block;
+      margin-top: .45rem;
+      color: var(--muted);
+      font-size: .85rem;
+    }
+    .flip-card { position: relative; display: block; width: 100%; aspect-ratio: 2 / 3; perspective: 1000px; }
+    .card-inner {
+      position: relative;
+      display: block;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform .6s cubic-bezier(.2, .7, .2, 1);
+      transition-delay: var(--flip-delay, 0s);
+    }
+    .card-inner.is-flipped { transform: rotateY(180deg); }
+    .card-face {
+      position: absolute;
+      inset: 0;
+      display: block;
+      border-radius: .45rem;
+      overflow: hidden;
+      backface-visibility: hidden;
+    }
+    .card-face.front { transform: rotateY(180deg); }
+    .card-face .card-art { height: 100%; aspect-ratio: auto; border-radius: inherit; }
+    .card-face.back {
+      display: grid;
+      place-items: center;
+      background-color: var(--navy);
+      background-image:
+        linear-gradient(45deg, transparent 44%, rgba(201, 162, 39, .26) 45% 47%, transparent 48%),
+        linear-gradient(-45deg, transparent 44%, rgba(201, 162, 39, .26) 45% 47%, transparent 48%),
+        radial-gradient(circle, rgba(201, 162, 39, .16) 0 2px, transparent 3px);
+      background-size: 22px 22px;
+      border: 2px solid var(--gold);
+      box-shadow: inset 0 0 0 3px var(--navy), inset 0 0 0 5px rgba(201, 162, 39, .8);
+    }
+    .back-ornament { display: block; width: 62%; color: var(--gold); }
     @media (min-width: 30rem) { .hand { grid-template-columns: repeat(3, 1fr); } }
+    @media (prefers-reduced-motion: reduce) {
+      .card-inner { transition: none; transition-delay: 0s; }
+      .card:hover { transform: none; }
+    }
   </style>
 </head>
 <body>
@@ -82,8 +318,8 @@
 
     <section class="scoreboard" aria-label="الحالة">
       <div>الجولة<strong id="round">-</strong></div>
-      <div>نجوم اللاعب ١<strong id="stars-p1">0</strong></div>
-      <div>نجوم اللاعب ٢<strong id="stars-p2">0</strong></div>
+      <div>نجوم اللاعب ١<strong id="stars-p1"></strong></div>
+      <div>نجوم اللاعب ٢<strong id="stars-p2"></strong></div>
     </section>
 
     <section class="switcher" aria-label="اختيار اللاعب">
@@ -96,8 +332,8 @@
     <section id="hand" class="hand" aria-label="بطاقات اللاعب"></section>
     <section id="reveal" class="reveal" hidden>
       <h2>كشف البطاقات</h2>
-      <div id="reveal-picks" class="picks"></div>
       <p id="reveal-result" class="muted"></p>
+      <div id="reveal-picks" class="picks"></div>
     </section>
   </main>
 
@@ -110,8 +346,63 @@
         citizen: "المواطن", Citizen: "المواطن",
         slave: "العبد", Slave: "العبد"
       };
+      var ARABIC_KINDS = {
+        "الإمبراطور": "emperor",
+        "المواطن": "citizen",
+        "العبد": "slave"
+      };
+      var CARD_META = {
+        emperor: { color: "#C9A227", ink: "#2b2109", rule: "الإمبراطور يتغلب على المواطن", emblem: "emperor" },
+        citizen: { color: "#2F6FB3", ink: "#fff6de", rule: "المواطن يتغلب على العبد", emblem: "citizen" },
+        slave: { color: "#8B5A2B", ink: "#fff6de", rule: "العبد يتغلب على الإمبراطور", emblem: "slave" }
+      };
       var PLAYER_NAMES = { p1: "اللاعب ١", p2: "اللاعب ٢" };
       var PLAYERS = ["p1", "p2"];
+
+      var CORNER_SVG = '<svg class="card-corner" viewBox="0 0 40 40" aria-hidden="true">' +
+        '<path d="M2 2h13M2 2v13M2 2c6 0 10 2 12 6M2 2c0 6 2 10 6 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
+        '<circle cx="9" cy="9" r="2.4" fill="currentColor"/>' +
+        '</svg>';
+      var EMBLEM_SVG = {
+        emperor: '<svg viewBox="0 0 120 120" aria-hidden="true">' +
+          '<g fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">' +
+          '<path d="M22 86h76l6-42-24 16-14-30-14 30-24-16z" fill="currentColor" fill-opacity=".14"/>' +
+          '<path d="M28 86h64v10H28z" fill="currentColor" fill-opacity=".2"/>' +
+          '<circle cx="60" cy="34" r="4" fill="currentColor"/>' +
+          '<circle cx="36" cy="50" r="3" fill="currentColor"/>' +
+          '<circle cx="84" cy="50" r="3" fill="currentColor"/>' +
+          '<path d="M60 8v12M28 16l8 9M92 16l-8 9M10 44l12 4M110 44l-12 4"/>' +
+          '</g></svg>',
+        citizen: '<svg viewBox="0 0 120 120" aria-hidden="true">' +
+          '<g fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">' +
+          '<path d="M60 14c-18 0-29 16-29 35 0 11 5 20 12 26h34c7-6 12-15 12-26 0-19-11-35-29-35z" fill="currentColor" fill-opacity=".14"/>' +
+          '<path d="M31 75c-16 6-25 18-27 33h112c-2-15-11-27-27-33" fill="currentColor" fill-opacity=".2"/>' +
+          '<path d="M45 51c2-9 8-14 15-14s13 5 15 14c0 10-7 18-15 18s-15-8-15-18z" fill="#fff6dc" fill-opacity=".82"/>' +
+          '<path d="M60 37v32M45 51c4-6 10-9 15-9s11 3 15 9"/>' +
+          '</g></svg>',
+        slave: '<svg viewBox="0 0 120 120" aria-hidden="true">' +
+          '<g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">' +
+          '<path d="M39 26a45 45 0 0 0-11 67"/>' +
+          '<path d="M74 93a45 45 0 0 0 19-47"/>' +
+          '<path d="M39 26l9 7M93 46l-10-3"/>' +
+          '<rect x="29" y="18" width="15" height="10" rx="5" transform="rotate(-28 36.5 23)"/>' +
+          '<rect x="84" y="40" width="15" height="10" rx="5" transform="rotate(66 91.5 45)"/>' +
+          '<rect x="76" y="89" width="15" height="10" rx="5" transform="rotate(24 83.5 94)"/>' +
+          '<rect x="21" y="76" width="15" height="10" rx="5" transform="rotate(-58 28.5 81)"/>' +
+          '<path d="M50 60h20M60 50v20" stroke-width="2"/>' +
+          '</g></svg>'
+      };
+      var BACK_SVG = '<svg class="back-ornament" viewBox="0 0 120 120" aria-hidden="true">' +
+        '<g fill="none" stroke="currentColor" stroke-width="2">' +
+        '<circle cx="60" cy="60" r="45"/>' +
+        '<circle cx="60" cy="60" r="34"/>' +
+        '<path d="M60 25l9 20 21 2-16 14 5 21-19-11-19 11 5-21-16-14 21-2z"/>' +
+        '<circle cx="60" cy="60" r="7" fill="currentColor" fill-opacity=".28"/>' +
+        '<path d="M60 6v12M60 102v12M6 60h12M102 60h12"/>' +
+        '</g></svg>';
+      var MEDAL_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+        '<path d="m12 3 2.6 5.8 6.4.6-4.8 4.2 1.4 6.3L12 16.8 6.4 19.9l1.4-6.3L3 9.4l6.4-.6z" fill="currentColor"/>' +
+        '</svg>';
 
       var matchId = null;
       var active = "p1";
@@ -119,6 +410,9 @@
       var previousStars = { p1: 0, p2: 0 };
       var roundNumber = null;
       var lastResult = null;
+      var committedPicks = { p1: null, p2: null };
+      var roundResolved = false;
+      var flipSignature = null;
 
       var statusEl = document.getElementById("status");
       var handEl = document.getElementById("hand");
@@ -137,7 +431,7 @@
       async function api(url, options) {
         var response = await fetch(url, options);
         var data = {};
-        try { data = await response.json(); } catch (ignored) { /* empty body */ }
+        try { data = await response.json(); } catch (ignored) { }
         if (!response.ok) {
           throw new Error(data.error || ("تعذر إكمال الطلب (" + response.status + ")"));
         }
@@ -148,8 +442,69 @@
         return CARD_NAMES[card.name] || CARD_NAMES[card.type] || card.name || "";
       }
 
+      function cardKind(card) {
+        var raw = card && (card.type || card.card_type || card.name);
+        var key = String(raw || "").trim().toLowerCase();
+        if (CARD_META[key]) return key;
+        return ARABIC_KINDS[raw] || "emperor";
+      }
+
       function phaseOf(view) {
         return String(view.phase || "").toLowerCase();
+      }
+
+      function svgNode(markup) {
+        var holder = document.createElement("span");
+        holder.innerHTML = markup;
+        return holder.firstChild;
+      }
+
+      function makeCardArt(card) {
+        var meta = CARD_META[cardKind(card)];
+        var art = document.createElement("span");
+        art.className = "card-art";
+        art.style.setProperty("--card-color", meta.color);
+        art.style.setProperty("--strip-ink", meta.ink);
+
+        var frame = document.createElement("span");
+        frame.className = "card-frame";
+        ["tl", "tr", "bl", "br"].forEach(function (position) {
+          var corner = svgNode(CORNER_SVG);
+          corner.classList.add(position);
+          frame.appendChild(corner);
+        });
+
+        var banner = document.createElement("span");
+        banner.className = "card-banner";
+        banner.textContent = cardName(card);
+
+        var emblem = document.createElement("span");
+        emblem.className = "card-emblem";
+        emblem.appendChild(svgNode(EMBLEM_SVG[meta.emblem]));
+
+        var rule = document.createElement("span");
+        rule.className = "card-rule";
+        rule.textContent = meta.rule;
+
+        frame.appendChild(banner);
+        frame.appendChild(emblem);
+        frame.appendChild(rule);
+        art.appendChild(frame);
+        return art;
+      }
+
+      function makeBackFace() {
+        var face = document.createElement("span");
+        face.className = "card-face back";
+        face.appendChild(svgNode(BACK_SVG));
+        return face;
+      }
+
+      function makeFrontFace(card) {
+        var face = document.createElement("span");
+        face.className = "card-face front";
+        face.appendChild(makeCardArt(card));
+        return face;
       }
 
       function resultFromStars(view) {
@@ -165,31 +520,86 @@
         return null;
       }
 
+      function localPicks(view) {
+        if (committedPicks.p1 === null || committedPicks.p2 === null) return null;
+        var cards = view.cards || [];
+        var picks = {};
+        PLAYERS.forEach(function (id) {
+          var card = cards[committedPicks[id]];
+          if (card) picks[id] = { card: card };
+        });
+        return picks.p1 && picks.p2 ? picks : null;
+      }
+
+      function tieResult(picks) {
+        return cardKind(picks.p1.card) === cardKind(picks.p2.card)
+          ? "تعادل اللاعبون، أُعيد خلط البطاقات."
+          : null;
+      }
+
+      function makeRevealPick(id, card, index) {
+        var node = document.createElement("span");
+        node.className = "pick";
+        node.setAttribute("data-player", PLAYER_NAMES[id]);
+        node.setAttribute("aria-label", PLAYER_NAMES[id] + ": " + cardName(card));
+        node.style.setProperty("--flip-delay", (index * 0.12) + "s");
+
+        var flip = document.createElement("span");
+        flip.className = "flip-card";
+        var inner = document.createElement("span");
+        inner.className = "card-inner";
+        inner.appendChild(makeBackFace());
+        inner.appendChild(makeFrontFace(card));
+        flip.appendChild(inner);
+        node.appendChild(flip);
+        return { node: node, inner: inner };
+      }
+
       function renderReveal(view) {
         var phase = phaseOf(view);
         var revealed = phase === "revealed" || view.revealed === true;
-        var picks = view.revealed_cards || view.picks || null;
-        var result = view.round_result || view.round_winner || view.result || lastResult;
+        var local = localPicks(view);
+        if (local) revealed = true;
+        var picks = view.revealed_cards || view.picks || local;
+        var result = view.round_result || view.round_winner || view.result || lastResult || (local && tieResult(local));
         revealPicksEl.textContent = "";
         revealResultEl.textContent = "";
 
-        if (!revealed) { revealEl.hidden = true; return; }
+        if (!revealed) { revealEl.hidden = true; flipSignature = null; return; }
         revealEl.hidden = false;
-        if (picks) {
-          PLAYERS.forEach(function (id) {
-            var pick = picks[id];
-            if (!pick) return;
-            var card = pick.card || pick;
-            var node = document.createElement("span");
-            node.className = "pick";
-            node.style.setProperty("--card-color", card.color || "#888");
-            node.textContent = PLAYER_NAMES[id] + ": " + cardName(card);
-            revealPicksEl.appendChild(node);
+        revealResultEl.textContent = typeof result === "string" ? result : "";
+
+        if (!picks) {
+          revealPicksEl.textContent = "تم كشف البطاقات.";
+          flipSignature = null;
+          return;
+        }
+
+        var signature = PLAYERS.map(function (id) {
+          return id + ":" + cardKind(picks[id].card);
+        }).join("|") + "|" + (typeof result === "string" ? result : "");
+        var animate = signature !== flipSignature;
+        flipSignature = signature;
+
+        var pending = [];
+        PLAYERS.forEach(function (id, index) {
+          var pick = picks[id];
+          if (!pick) return;
+          var card = pick.card || pick;
+          var built = makeRevealPick(id, card, index);
+          revealPicksEl.appendChild(built.node);
+          pending.push(built.inner);
+        });
+
+        if (animate && pending.length) {
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              pending.forEach(function (inner) { inner.classList.add("is-flipped"); });
+            });
           });
         } else {
-          revealPicksEl.textContent = "تم كشف البطاقات.";
+          pending.forEach(function (inner) { inner.classList.add("is-flipped"); });
         }
-        revealResultEl.textContent = typeof result === "string" ? result : "";
       }
 
       function renderCards(view) {
@@ -205,14 +615,11 @@
           var button = document.createElement("button");
           button.type = "button";
           button.className = "card";
-          button.style.setProperty("--card-color", card.color || "#888");
+          var meta = CARD_META[cardKind(card)];
+          button.style.setProperty("--card-color", meta.color);
           button.setAttribute("data-position", String(position));
-          var swatch = document.createElement("span");
-          swatch.className = "swatch";
-          var label = document.createElement("span");
-          label.textContent = cardName(card);
-          button.appendChild(swatch);
-          button.appendChild(label);
+          button.setAttribute("aria-label", cardName(card));
+          button.appendChild(makeCardArt(card));
           button.addEventListener("click", function () { selectCard(position); });
           handEl.appendChild(button);
         });
@@ -223,7 +630,17 @@
         var view = currentView;
         var stars = view.stars || {};
         PLAYERS.forEach(function (id) {
-          starsEls[id].textContent = String(stars[id] === undefined ? 0 : stars[id]);
+          var count = Math.max(0, Math.floor(Number(stars[id] || 0)));
+          var holder = starsEls[id];
+          holder.textContent = "";
+          holder.setAttribute("aria-label", String(count));
+          for (var i = 0; i < count; i++) {
+            var medal = document.createElement("span");
+            medal.className = "medal";
+            medal.setAttribute("aria-hidden", "true");
+            medal.appendChild(svgNode(MEDAL_SVG));
+            holder.appendChild(medal);
+          }
         });
         if (view.round_number !== undefined && view.round_number !== null) {
           roundNumber = view.round_number;
@@ -262,6 +679,8 @@
 
       async function selectCard(position) {
         if (!matchId) { setStatus("ابدأ مباراة جديدة أولاً.", true); return; }
+        var selectingPlayer = active;
+        var wasResolved = roundResolved;
         try {
           var view = await api(
             "/api/matches/" + encodeURIComponent(matchId) + "/select",
@@ -271,7 +690,14 @@
               body: JSON.stringify({ player: active, position: position })
             }
           );
-          lastResult = view.round_result || view.round_winner || resultFromStars(view);
+          if (wasResolved) {
+            committedPicks = { p1: null, p2: null };
+            roundResolved = false;
+            lastResult = null;
+          }
+          committedPicks[selectingPlayer] = position;
+          if (committedPicks.p1 !== null && committedPicks.p2 !== null) roundResolved = true;
+          lastResult = view.round_result || view.round_winner || resultFromStars(view) || lastResult;
           currentView = view;
           render();
         } catch (error) {
@@ -300,6 +726,9 @@
           previousStars = { p1: 0, p2: 0 };
           roundNumber = null;
           lastResult = null;
+          committedPicks = { p1: null, p2: null };
+          roundResolved = false;
+          flipSignature = null;
           setActive("p1");
           setStatus("بدأت مباراة جديدة.");
         } catch (error) {
